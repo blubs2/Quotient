@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useApp } from "@/components/AppProvider";
+import { RatingsStrip } from "@/components/charts";
 import { dailyNumber } from "@/lib/rng";
 
 export default function Home() {
@@ -40,6 +41,14 @@ export default function Home() {
         <span className="qz-arrow">→</span>
       </Link>
 
+      <Link href="/progress" className="qz-tile">
+        <div>
+          <div className="qz-eyebrow">Progress</div>
+          <div className="qz-tile-title">Assessment history · domain ratings · charts</div>
+        </div>
+        <span className="qz-arrow">→</span>
+      </Link>
+
       <Link href="/session" className="qz-tile">
         <div>
           <div className="qz-eyebrow">Today&apos;s Session</div>
@@ -47,6 +56,8 @@ export default function Home() {
         </div>
         <span className="qz-arrow">→</span>
       </Link>
+
+      {user && <RatingsStrip />}
 
       <div className="qz-statbar">
         <div><span className="qz-stat-n">{total}</span><span className="qz-stat-l">answered</span></div>

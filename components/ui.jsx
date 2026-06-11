@@ -305,7 +305,7 @@ export function Chrome() {
         <Link href="/daily">Daily</Link>
         <Link href="/assessment">Assess</Link>
         <Link href="/practice">Practice</Link>
-        <Link href="/session">Session</Link>
+        <Link href="/progress">Progress</Link>
         {app?.user ? (
           <button className="qz-chrome-auth" onClick={app.signOut} title={app.user.email}>
             Sign out

@@ -12,16 +12,11 @@ import {
 import { QuestionCard, ProgressDots } from "@/components/ui";
 import { DigitSpanStage, SequencingStage, SymbolSprintStage } from "@/components/stages";
 import { useApp } from "@/components/AppProvider";
-
-const DOMAIN = {
-  matrices: "Fluid Reasoning", series: "Fluid Reasoning", weights: "Fluid Reasoning",
-  analogies: "Verbal", antonyms: "Verbal",
-  arithmetic: "Quantitative",
-  blocks: "Visual-Spatial", rotation: "Visual-Spatial",
-};
+import { DOMAIN } from "@/lib/domains";
+import Link2 from "next/link";
 
 export default function AssessmentPage() {
-  const { logAttempt } = useApp();
+  const { logAttempt, rateAnswer, saveAssessment } = useApp();
   const battery = useMemo(() => {
     const rng = mulberry32(Date.now() % 2147483647);
     const T = (q, t) => ({ ...q, timeLimit: t });
@@ -50,8 +45,10 @@ export default function AssessmentPage() {
   const idx = results.length;
 
   const answer = (ok, ms) => {
-    logAttempt(battery[idx].cat, ok, ms);
-    const next = [...results, { cat: battery[idx].cat, ok, ms }];
+    const q = battery[idx];
+    logAttempt(q.cat, ok, ms, { tpl: q.tpl || q.cat, diff: q.diff || null, timed: true });
+    rateAnswer(q, ok);
+    const next = [...results, { cat: q.cat, ok, ms }];
     setResults(next);
     if (next.length >= battery.length) setPhase("digits");
   };
@@ -122,6 +119,11 @@ export default function AssessmentPage() {
           onDone={(s) => {
             logAttempt("speed", s.ok >= s.n * 0.8, null);
             setSprint(s);
+            saveAssessment(
+              (() => { const d = {}; for (const r of results) { const k = DOMAIN[r.cat]; d[k] = d[k] || { ok: 0, n: 0, ms: 0 }; d[k].ok += r.ok ? 1 : 0; d[k].n += 1; d[k].ms += r.ms || 0; } return d; })(),
+              [...(memory || []), ...(seqRes || [])],
+              s
+            );
             setPhase("score");
           }}
         />
@@ -162,8 +164,9 @@ export default function AssessmentPage() {
             )}
           </div>
           <p className="qz-note" style={{ marginTop: 16 }}>
-            Run this weekly and watch the bars move. Your lowest bar is where practice
-            pays off fastest — head to Practice and drill that category.
+            This run is saved. Head to <Link2 href="/progress" style={{ color: "var(--cobalt)" }}>Progress</Link2> to
+            see it charted against your past runs — your lowest bar is where practice
+            pays off fastest.
           </p>
           <Link href="/" className="qz-primary" style={{ textDecoration: "none", display: "inline-block" }}>Done</Link>
         </div>

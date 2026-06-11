@@ -5,11 +5,13 @@ import { mulberry32, dateSeed, dailyNumber } from "@/lib/rng";
 import { genMatrix, genSeries, genAntonym, genArithmetic, genWeights, genRotation } from "@/lib/generators";
 import { QuestionCard, ProgressDots } from "@/components/ui";
 import { useApp } from "@/components/AppProvider";
+import { NamePrompt } from "@/components/charts";
+import { Leaderboard } from "@/components/leaderboard";
 
 const DIFF_LABEL = { 1: "warm-up", 2: "standard", 3: "hard" };
 
 export default function DailyPage() {
-  const { logAttempt, saveDaily } = useApp();
+  const { logAttempt, saveDaily, rateAnswer } = useApp();
   const dn = dailyNumber();
   // Five questions, ramping easy -> hard. Seeded by date: identical worldwide.
   const daily = useMemo(() => {
@@ -26,16 +28,21 @@ export default function DailyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [results, setResults] = useState([]);
+  const [msTotal, setMsTotal] = useState(0);
   const [copied, setCopied] = useState(false);
   const idx = results.length;
   const done = idx >= daily.length;
   const score = results.filter(Boolean).length;
 
   const answer = (ok, ms) => {
-    logAttempt(daily[idx].cat, ok, ms);
+    const q = daily[idx];
+    logAttempt(q.cat, ok, ms, { tpl: q.tpl || q.cat, diff: q.diff || null, timed: true });
+    rateAnswer(q, ok);
+    const totalNow = msTotal + (ms || 0);
+    setMsTotal(totalNow);
     const next = [...results, ok];
     setResults(next);
-    if (next.length === daily.length) saveDaily(dn, next);
+    if (next.length === daily.length) saveDaily(dn, next, totalNow);
   };
 
   const share = () => {
@@ -70,6 +77,8 @@ export default function DailyPage() {
             {" "}Same six questions for everyone today. #{dn + 1} arrives at midnight.
           </p>
           <button className="qz-primary" onClick={share}>{copied ? "Copied!" : "Copy share result"}</button>
+          <NamePrompt />
+          <Leaderboard dailyNumber={dn} />
         </div>
       )}
     </div>
