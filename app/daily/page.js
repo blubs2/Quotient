@@ -2,8 +2,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { mulberry32, dateSeed, dailyNumber } from "@/lib/rng";
-import { genMatrix, genSeries, genAnalogy, genVocabQ } from "@/lib/generators";
-import { VOCAB } from "@/lib/data/vocab";
+import { genMatrix, genSeries, genAntonym, genArithmetic, genWeights, genRotation } from "@/lib/generators";
 import { QuestionCard, ProgressDots } from "@/components/ui";
 import { useApp } from "@/components/AppProvider";
 
@@ -15,13 +14,14 @@ export default function DailyPage() {
   // Five questions, ramping easy -> hard. Seeded by date: identical worldwide.
   const daily = useMemo(() => {
     const rng = mulberry32(dateSeed());
-    const wordOfDay = VOCAB[dn % VOCAB.length];
+    const T = (q, t) => ({ ...q, timeLimit: t });
     return [
-      genMatrix(rng, 1),
-      genSeries(rng, 2),
-      genVocabQ(wordOfDay, rng, 2),
-      genAnalogy(rng, new Set(), 3),
-      genMatrix(rng, 3),
+      T(genMatrix(rng, 2), 60),
+      T(genArithmetic(rng, 2), 45),
+      T(genAntonym(rng), 25),
+      T(genWeights(rng, 2), 60),
+      T(genRotation(rng, 2), 35),
+      T(genMatrix(rng, 3), 75),
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -62,12 +62,12 @@ export default function DailyPage() {
           <div className="qz-bigscore">{score}/{daily.length}</div>
           <div className="qz-squares">{results.map((r, i) => <span key={i}>{r ? "\u{1F7E9}" : "\u{1F7E5}"}</span>)}</div>
           <p className="qz-note">
-            {score === 5
-              ? "Perfect — including the hard tier. Respect."
-              : score >= 3
-              ? "Solid. Questions 4 and 5 are meant to bite."
-              : "The ramp gets steep at the end — that's by design. Tomorrow's another shot."}
-            {" "}Same five puzzles for everyone today. #{dn + 1} arrives at midnight.
+            {score === 6
+              ? "Perfect, under the clock. Respect."
+              : score >= 4
+              ? "Solid — the clock is half the difficulty."
+              : "Timed questions feel different. That's the point — pacing is a skill."}
+            {" "}Same six questions for everyone today. #{dn + 1} arrives at midnight.
           </p>
           <button className="qz-primary" onClick={share}>{copied ? "Copied!" : "Copy share result"}</button>
         </div>

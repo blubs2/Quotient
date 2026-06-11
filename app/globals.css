@@ -213,3 +213,25 @@ body {
   .qz-statbar > div { min-width: 42%; }
   .qz-chrome-nav { gap: 10px; }
 }
+
+/* ---- v3: timers, weights, hints ---- */
+.qz-timer { height: 6px; background: var(--line); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+.qz-timer-bar { height: 100%; border-radius: 3px; transition: width 1s linear; }
+.qz-hint { color: var(--graphite); text-transform: none; letter-spacing: 0.02em; }
+.qz-weights { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 18px; }
+.qz-scale { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.qz-pan { border: 1.5px solid var(--ink); border-radius: 8px; padding: 8px 14px; min-width: 90px; text-align: center; background: #fff; }
+.qz-beam { font-family: var(--mono); font-weight: 600; font-size: 18px; color: var(--cobalt); }
+.qz-qmark { font-family: var(--mono); font-weight: 600; font-size: 22px; color: var(--cobalt); }
+.qz-flash { font-family: var(--mono); font-size: 64px; font-weight: 600; text-align: center; padding: 40px 0; letter-spacing: 0.1em; min-height: 150px; }
+.qz-sprint-row { display: flex; align-items: center; justify-content: center; gap: 26px; font-size: 34px; margin: 18px 0; }
+.qz-sprint-targets { border: 2px solid var(--cobalt); border-radius: 10px; padding: 6px 14px; }
+.qz-sprint-group { border: 1.5px solid var(--ink); border-radius: 10px; padding: 6px 14px; letter-spacing: 8px; }
+.qz-yn { display: flex; gap: 12px; justify-content: center; }
+.qz-yn button { flex: 1; max-width: 160px; }
+.qz-scorecard { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.qz-scorerow { display: flex; align-items: center; gap: 12px; }
+.qz-scorelabel { font-family: var(--mono); font-size: 12px; width: 150px; text-transform: uppercase; letter-spacing: 0.06em; }
+.qz-scoretrack { flex: 1; height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; }
+.qz-scorefill { height: 100%; background: var(--cobalt); border-radius: 7px; }
+.qz-scoreval { font-family: var(--mono); font-size: 13px; width: 88px; text-align: right; }

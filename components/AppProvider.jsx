@@ -10,12 +10,8 @@ import { VOCAB } from "@/lib/data/vocab";
 const Ctx = createContext(null);
 export const useApp = () => useContext(Ctx);
 
-const emptyStats = () => ({
-  matrices: { n: 0, ok: 0 },
-  series: { n: 0, ok: 0 },
-  analogies: { n: 0, ok: 0 },
-  vocab: { n: 0, ok: 0 },
-});
+const CATS = ["matrices", "series", "analogies", "vocab", "antonyms", "arithmetic", "weights", "blocks", "rotation", "memory", "speed"];
+const emptyStats = () => Object.fromEntries(CATS.map((c) => [c, { n: 0, ok: 0 }]));
 
 export default function AppProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -71,7 +67,7 @@ export default function AppProvider({ children }) {
     (cat, correct, ms = null) => {
       setStats((s) => ({
         ...s,
-        [cat]: { n: s[cat].n + 1, ok: s[cat].ok + (correct ? 1 : 0) },
+        [cat]: { n: (s[cat]?.n || 0) + 1, ok: (s[cat]?.ok || 0) + (correct ? 1 : 0) },
       }));
       if (user && supabase)
         supabase.from("attempts").insert({ user_id: user.id, cat, correct, ms }).then(() => {});

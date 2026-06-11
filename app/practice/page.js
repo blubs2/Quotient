@@ -1,8 +1,8 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { mulberry32, pick } from "@/lib/rng";
-import { genMatrix, genSeries, genAnalogy, genVocabQ } from "@/lib/generators";
+import { genMatrix, genSeries, genAnalogy, genVocabQ, genAntonym, genArithmetic, genWeights, genBlocks, genRotation } from "@/lib/generators";
 import { VOCAB } from "@/lib/data/vocab";
 import { ANALOGIES } from "@/lib/data/analogies";
 import { QuestionCard } from "@/components/ui";
@@ -11,7 +11,12 @@ import { useApp } from "@/components/AppProvider";
 const CATS = [
   { id: "mixed", label: "Mixed" },
   { id: "matrices", label: "Matrices" },
+  { id: "weights", label: "Weights" },
+  { id: "blocks", label: "Blocks" },
+  { id: "rotation", label: "Rotation" },
   { id: "series", label: "Series" },
+  { id: "arithmetic", label: "Arithmetic" },
+  { id: "antonyms", label: "Antonyms" },
   { id: "analogies", label: "Analogies" },
   { id: "vocab", label: "Vocabulary" },
 ];
@@ -32,20 +37,35 @@ export default function PracticePage() {
 
   // Adaptive: difficulty climbs with your streak (3 right -> medium,
   // 6 right -> hard) and resets to easy on a miss.
-  const diff = level === 0 ? 1 + Math.min(2, Math.floor(run.streak / 3)) : level;
+  const diff = level === 0 ? 1 + Math.min(2, Math.floor(run.streak / 2)) : level;
+  // Anti-repeat: remember the last 30 question signatures and regenerate
+  // (up to 8 tries) if we'd serve one the player has just seen.
+  const recentRef = useRef([]);
 
   const q = useMemo(() => {
-    const rng = mulberry32((Date.now() + tick * 7919) % 2147483647);
-    const c = cat === "mixed" ? pick(["matrices", "series", "analogies", "vocab"], rng) : cat;
-    if (c === "matrices") return genMatrix(rng, diff);
-    if (c === "series") return genSeries(rng, diff);
-    if (c === "analogies") {
-      if (usedAnalogies.size >= ANALOGIES.length) usedAnalogies.clear();
-      const a = genAnalogy(rng, usedAnalogies, diff);
-      usedAnalogies.add(a.bankIndex);
-      return a;
+    let out = null, key = "";
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const rng = mulberry32((Date.now() + tick * 7919 + attempt * 104729) % 2147483647);
+      const c = cat === "mixed"
+        ? pick(["matrices", "weights", "blocks", "rotation", "series", "arithmetic", "antonyms", "analogies", "vocab"], rng)
+        : cat;
+      if (c === "matrices") out = genMatrix(rng, diff);
+      else if (c === "weights") out = genWeights(rng, Math.max(2, diff));
+      else if (c === "blocks") out = genBlocks(rng, diff);
+      else if (c === "rotation") out = genRotation(rng, diff);
+      else if (c === "series") out = genSeries(rng, diff);
+      else if (c === "arithmetic") out = genArithmetic(rng, diff);
+      else if (c === "antonyms") out = genAntonym(rng);
+      else if (c === "analogies") {
+        if (usedAnalogies.size >= ANALOGIES.length) usedAnalogies.clear();
+        out = genAnalogy(rng, usedAnalogies, diff);
+      } else out = genVocabQ(pick(VOCAB, rng), rng, diff);
+      key = out.cat + ":" + JSON.stringify(out.grid || out.heights || out.target || out.scales || out.prompt);
+      if (!recentRef.current.includes(key)) break;
     }
-    return genVocabQ(pick(VOCAB, rng), rng, diff);
+    if (out.cat === "analogies") usedAnalogies.add(out.bankIndex);
+    recentRef.current = [...recentRef.current.filter((k) => k !== key), key].slice(-30);
+    return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cat, tick]);
 
