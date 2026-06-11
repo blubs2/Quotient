@@ -10,10 +10,10 @@ export default function SessionPage() {
   const { dueWords, logAttempt, reviewWord } = useApp();
   const queue = useMemo(() => {
     const rng = mulberry32(Date.now() % 2147483647);
-    const qs = dueWords(6).map((w) => genVocabQ(w, rng));
-    qs.splice(Math.min(2, qs.length), 0, genMatrix(rng));
-    qs.splice(Math.min(5, qs.length), 0, genSeries(rng));
-    qs.push(genAnalogy(rng));
+    const qs = dueWords(6).map((w) => genVocabQ(w, rng, 2));
+    qs.splice(Math.min(2, qs.length), 0, genMatrix(rng, 2));
+    qs.splice(Math.min(5, qs.length), 0, genSeries(rng, 2));
+    qs.push(genAnalogy(rng, new Set(), 2));
     return qs;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
