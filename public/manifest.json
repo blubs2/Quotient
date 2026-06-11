@@ -1,0 +1,13 @@
+{
+  "name": "Quotient — daily cognitive training",
+  "short_name": "Quotient",
+  "description": "Daily reasoning puzzles and spaced-repetition vocabulary, with every answer explained.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFBFE",
+  "theme_color": "#2B4BD8",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
